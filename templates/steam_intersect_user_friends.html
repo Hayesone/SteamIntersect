@@ -1,0 +1,45 @@
+{% extends "steam_intersect.html" %}
+{% set active_page = "steam_intersect" %}
+
+
+{% block content %}
+
+    <h1>{% block title %} SteamIntersect {% endblock %}</h1>
+    <div>
+        <div class="form">
+            <form class="form" method="POST" action="{{ url_for('steam_intersect') }}">
+                <div class="form-group">
+                    {{ form.steam64id.label(class="form-label") }}
+                    {{ form.steam64id(class="form-control") }}
+                </div>
+                {{ form.submit(class="btn btn-defaul##t") }}
+            </form>
+        </div>
+    </div>
+
+    <br>
+
+    {% if output %}
+        <div class="d-flex justify-content-center flex-wrap">
+
+        </div>
+
+        <div class="d-flex justify-content-center flex-wrap">
+            {% for user in output %}
+            <div class="card" style="width:124px;margin: 5px">
+                <img class="card-img-top" src="{{ user['avatarfull'] }}" alt="Card image" style="width:100%">
+                <div class="card-body">
+                    <p class="card-text">{{ user["personaname"] }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div align="center">
+            <h4><b>Enter a steam64id</b></h4>
+        </div>
+    {% endif %}
+
+
+
+{% endblock %}

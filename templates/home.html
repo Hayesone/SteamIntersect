@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% set active_page = "home" %}
+
+
+{% block content %}
+    <style>
+
+        a {align:center}
+
+    </style>
+
+    <h1>{% block title %} Home {% endblock %}</h1>
+    <p>Welcome to my portfolio, this hosts various projects I have completed or are still being worked on.</p>
+
+
+    <a class="btn btn-dark my-auto" href="{{ url_for('steam_intersect') }}">SteamIntersect</a>
+
+
+{% endblock %}
