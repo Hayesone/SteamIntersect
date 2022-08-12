@@ -1,0 +1,35 @@
+{% extends "steam_intersect.html" %}
+{% set active_page = "steam_intersect" %}
+
+
+{% block intersect_content %}
+
+    <h2>Shared Games</h2>
+
+
+    <div class="pt-2 d-flex justify-content-center flex-wrap">
+
+            {% if shared_games %}
+                {% for game in shared_games %}
+                    <label class="col-12 col-md-6 col-lg-3">
+                        <div class="card" >
+                            <img class="card-img-top p-2" src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ game }}/header.jpg" alt="Card image" style="width:100%">
+                            <div class="card-body">
+                                <p class="card-text">{{ shared_games[game]["info"]["name"] }}</p>
+                            </div>
+                        </div>
+                    </label>
+                {% endfor %}
+
+            {% else %}
+                <div align="center">
+                    <h4>Error:<b>{{ error }}</b></h4>
+                </div>
+            {% endif %}
+
+
+        </div>
+
+
+
+{% endblock %}

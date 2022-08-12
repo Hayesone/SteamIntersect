@@ -4,10 +4,20 @@
 
 {% block intersect_content %}
 
+    <style>
+        input {
+          display: none;
+        }
+
+        input:checked ~ div {
+          background: #e1e1e1;
+        }
+    </style>
+
     <h1>{% block title %} SteamIntersect {% endblock %}</h1>
     <div>
         <div class="form">
-            <form class="form" method="POST" action="{{ url_for('steam_intersect') }}">
+            <form class="form" method="GET" action="{{ url_for('steam_intersect') }}">
                 <div class="form-group">
                     {{ form.steam64id.label(class="form-label") }}
                     {{ form.steam64id(class="form-control") }}
@@ -20,21 +30,26 @@
     <br>
 
     {% if output %}
+        <form method="POST" action="/steam_intersect/{{ input }}">
         <div class="d-flex justify-content-center flex-wrap">
 
-        </div>
+                {% for user in output %}
+                <label class="col-6 col-md-3 col-lg-2">
+                    <input type="checkbox" id="" name="ids[]" value="{{ user["steamid"]}}">
+                    <div class="card" >
+                        <img class="card-img-top p-2" src="{{ user['avatarfull'] }}" alt="Card image" style="width:100%">
+                        <div class="card-body">
+                            <p class="card-text text-center">{{ user["personaname"] }}</p>
 
-        <div class="d-flex justify-content-center flex-wrap">
-            {% for user in output %}
-            <div class="card" style="width:124px;margin: 5px">
-                <a href="{{ url_for('steam_friends', steam64id=user["steamid"]) }}"><img class="card-img-top" src="{{ user['avatarfull'] }}" alt="Card image" style="width:100%"></a>
-                <div class="card-body">
-                    <p class="card-text">{{ user["personaname"] }}</p>
-                    <p class="card-text">{{ user["steamid"]}}</p>
-                </div>
-            </div>
-            {% endfor %}
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+
+
         </div>
+        <button value="submit">Submit</button>
+        </form>
     {% else %}
         <div align="center">
             <h4><b>{{ error }}</b></h4>
