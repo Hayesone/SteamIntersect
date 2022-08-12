@@ -42,28 +42,30 @@ def getFriendsList(steam64id):
 def getFriendListDataAll(steam64id):
     print(f"---\nStarting: {inspect.stack()[0][3]}")
     try:
+        # TODO: Check if privacy is Friends/Private before calling friends list
+        friend_steam64id = getFriendsList(steam64id)
 
-        friendIDs = []
-        friendsDict = []
+        friendID_list = []
+        friendsListData_dict = []
 
-        for x in steam64id["friendslist"]["friends"]:
-            friendIDs.append(x["steamid"])
+        for x in friend_steam64id["friendslist"]["friends"]:
+            friendID_list.append(x["steamid"])
 
         print(f"Fetching friend list data.")
 
         # batch calls for steam friends, limited to 100 per call
-        batchSize = (len(friendIDs) - 1) // 100 + 1
+        batchSize = (len(friendID_list) - 1) // 100 + 1
         for i in range(batchSize):
-            batch = friendIDs[i * 100:(i + 1) * 100]
+            batch = friendID_list[i * 100:(i + 1) * 100]
 
             # join steam64ids together and query Steam Web API for their data
             # TODO: Fix dictionary merging
             query = ",".join(batch)
             tempDict = checkUserExists(query)["response"]["players"]
-            friendsDict = friendsDict + tempDict
-            print(len(friendsDict))
+            friendsListData_dict = friendsListData_dict + tempDict
+            print(len(friendsListData_dict))
 
-        return friendsDict
+        return friendsListData_dict
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -80,6 +82,9 @@ def getOwnedGames(steam64id):
         jsonResponse = response.json()
         print(f"{inspect.stack()[0][3]}: JSON response")
         print(f"{response.url}")
+        print(f"{response.json()}")
+        if jsonResponse["response"] == {}:
+            print("User privacy settings do not ")
 
     except HTTPError as http_err:
         print(f'HTTP error occurred: {http_err}')
@@ -197,15 +202,15 @@ def getFriendData():
          'avatarhash': '71f02ee38d998de6213289568b3d9c67c62fa25b', 'lastlogoff': 1654008921, 'personastate': 0,
          'personastateflags': 0},
         {'steamid': '76561198281483220', 'communityvisibilitystate': 3, 'profilestate': 1,
-        'personaname': 'ˢᴵᴿ ๖ۣۜkhalif ツ',
-        'profileurl': 'https://steamcommunity.com/id/sirkhalif/',
-        'avatar': 'https://avatars.akamai.steamstatic.com/06cf7223d73704b6e5b602e882714007a56383fc.jpg',
-        'avatarmedium': 'https://avatars.akamai.steamstatic.com/06cf7223d73704b6e5b602e882714007a56383fc_medium.jpg',
-        'avatarfull': 'https://avatars.akamai.steamstatic.com/06cf7223d73704b6e5b602e882714007a56383fc_full.jpg',
-        'avatarhash': '06cf7223d73704b6e5b602e882714007a56383fc', 'lastlogoff': 1564669000,
-        'personastate': 0, 'realname': 'khalif', 'primaryclanid': '103582791456275818',
-        'timecreated': 1454628068, 'personastateflags': 0, 'loccountrycode': 'DE',
-        'locstatecode': '07'},
+         'personaname': 'ˢᴵᴿ ๖ۣۜkhalif ツ',
+         'profileurl': 'https://steamcommunity.com/id/sirkhalif/',
+         'avatar': 'https://avatars.akamai.steamstatic.com/06cf7223d73704b6e5b602e882714007a56383fc.jpg',
+         'avatarmedium': 'https://avatars.akamai.steamstatic.com/06cf7223d73704b6e5b602e882714007a56383fc_medium.jpg',
+         'avatarfull': 'https://avatars.akamai.steamstatic.com/06cf7223d73704b6e5b602e882714007a56383fc_full.jpg',
+         'avatarhash': '06cf7223d73704b6e5b602e882714007a56383fc', 'lastlogoff': 1564669000,
+         'personastate': 0, 'realname': 'khalif', 'primaryclanid': '103582791456275818',
+         'timecreated': 1454628068, 'personastateflags': 0, 'loccountrycode': 'DE',
+         'locstatecode': '07'},
         {'steamid': '76561199030976117', 'communityvisibilitystate': 3, 'profilestate': 1, 'personaname': 'george',
          'profileurl': 'https://steamcommunity.com/profiles/76561199030976117/',
          'avatar': 'https://avatars.akamai.steamstatic.com/8f4d8b824e57e7d482a745f9ac97412b7c9a2302.jpg',
@@ -310,7 +315,6 @@ def getFriendData():
 
 
 if __name__ == '__main__':
-
     # checkUserExists("76561198050567488")
     # getFriendListDataAll(getFriendsList("76561198050567488"))
 

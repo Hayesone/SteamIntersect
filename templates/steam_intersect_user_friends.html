@@ -2,7 +2,7 @@
 {% set active_page = "steam_intersect" %}
 
 
-{% block content %}
+{% block intersect_content %}
 
     <h1>{% block title %} SteamIntersect {% endblock %}</h1>
     <div>
@@ -27,16 +27,17 @@
         <div class="d-flex justify-content-center flex-wrap">
             {% for user in output %}
             <div class="card" style="width:124px;margin: 5px">
-                <img class="card-img-top" src="{{ user['avatarfull'] }}" alt="Card image" style="width:100%">
+                <a href="{{ url_for('steam_friends', steam64id=user["steamid"]) }}"><img class="card-img-top" src="{{ user['avatarfull'] }}" alt="Card image" style="width:100%"></a>
                 <div class="card-body">
                     <p class="card-text">{{ user["personaname"] }}</p>
+                    <p class="card-text">{{ user["steamid"]}}</p>
                 </div>
             </div>
             {% endfor %}
         </div>
     {% else %}
         <div align="center">
-            <h4><b>Enter a steam64id</b></h4>
+            <h4><b>Entered steam64id not recognised.</b></h4>
         </div>
     {% endif %}
 

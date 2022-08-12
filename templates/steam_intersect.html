@@ -42,23 +42,27 @@
       </div>
     </nav>
 
-    <h1>{% block title %} SteamIntersect {% endblock %}</h1>
-    <p>Compare your friends steam games to see which games you have in common.</p>
 
 
-    <a class="btn btn-dark my-auto" href="{{ url_for('steam_intersect') }}">SteamIntersect</a>
+
 
     <div>
-        <div class="form">
-            <h3>Friends List</h3>
-            <form class="form" method="post" action="{{ url_for('steam_intersect') }}">
-                <div class="form-group">
-                    {{ form.steam64id.label(class="form-label") }}
-                    {{ form.steam64id(class="form-control") }}
-                </div>
-                {{ form.submit(class="btn btn-default") }}
-            </form>
+    {% block intersect_content %}
+        <h1>{% block title %} SteamIntersect {% endblock %}</h1>
+        <p>Compare your friends steam games to see which games you have in common.</p>
+        <div>
+            <div class="form">
+                <h3>Friends List</h3>
+                <form class="form" method="post" action="{{ url_for('steam_intersect') }}">
+                    <div class="form-group">
+                        {{ form.steam64id.label(class="form-label") }}
+                        {{ form.steam64id(class="form-control") }}
+                    </div>
+                    {{ form.submit(class="btn btn-default") }}
+                </form>
+            </div>
         </div>
+    {% endblock %}
     </div>
 
 
