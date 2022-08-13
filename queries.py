@@ -1,4 +1,3 @@
-from functools import reduce
 import requests, inspect
 from requests.exceptions import HTTPError
 from apikey import SteamWeb_Api_Key
@@ -31,12 +30,20 @@ def getFriendsList(steam64id):
         jsonResponse = response.json()
         print(f"{inspect.stack()[0][3]}: JSON response")
         print(f"{response.url}")
+        return jsonResponse
 
     except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
+        if http_err.errno == None:
+            print(f"Accessed denied due to user privacy\nHTTPError:")
+            raise
+        else:
+            print(f"HTTPError: {http_err.errno}")
+
     except Exception as err:
-        print(f'Other error occurred: {err}')
-    return jsonResponse
+        print(type(err))
+
+
+
 
 
 def getFriendListDataAll(steam64id):
@@ -68,9 +75,11 @@ def getFriendListDataAll(steam64id):
         return friendsListData_dict
 
     except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
+        print(http_err.errno)
+
     except Exception as err:
-        print(f'Other error occurred: {err}')
+        print(type(err))
+        print(f'{inspect.stack()[0][3]} - Other error occurred:{err}')
 
 
 def getOwnedGames(steam64id):

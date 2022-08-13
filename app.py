@@ -8,6 +8,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '37bda0c866a9d9446eb72b23f1b56d20204cf7a78d5388de'
 
 
+
+
 @app.route('/')
 def hello_world():  # put application's code here
     return home()
@@ -39,10 +41,14 @@ def steam_friends(steam64id):
         output = queries.getFriendListDataAll(steam64id)
         sortedoutput = sorted(output, key=lambda d: d['personaname'])
         return render_template("steam_intersect_user_friends.html", form=form, output=sortedoutput, input=steam64id)
+    except TypeError as e:
+        output = f"User privacy settings likely blocking view of friends list."
+        return render_template("steam_intersect_user_friends.html", form=form, error=output)
+
     except Exception as e:
         output = f"{e}"
         print(output)
-        return render_template("steam_intersect_user_friends.html", form=form)
+        return render_template("steam_intersect_user_friends.html", form=form, exception=e)
 
 
 if __name__ == '__main__':
