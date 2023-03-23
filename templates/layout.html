@@ -11,6 +11,10 @@
 <body>
 
 <style>
+    body {
+       margin-bottom: 5rem;
+    }
+
     hr {
     margin-top: 1rem;
     margin-bottom: 1rem;
@@ -36,9 +40,9 @@
     </ul>
 </nav>
 
-<div class="container">
-  {% block content %} {% endblock %}
-</div>
+
+{% block content %} {% endblock %}
+
 
 </body>
 </html>
