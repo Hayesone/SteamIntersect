@@ -1,5 +1,7 @@
+import re
 import time
 from pprint import pprint
+from re import search
 
 import requests, inspect
 from requests.exceptions import HTTPError
@@ -29,7 +31,7 @@ def getFriendsList(steam64id):
         response = requests.get(
             f'http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={SteamWeb_Api_Key}&steamid={steam64id}&relationship=friend')
         response.raise_for_status()
-        # access JSOn content
+        # access JSON content
         jsonResponse = response.json()
         print(f"{inspect.stack()[0][3]}: JSON response")
         print(f"{response.url}")
@@ -87,14 +89,13 @@ def getOwnedGames(steam64id):
         response = requests.get(
             f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1?key={SteamWeb_Api_Key}&steamid={steam64id}&include_appinfo=true&include_played_free_games=true")
         response.raise_for_status()
-        # access JSOn content
+        # access JSON content
         jsonResponse = response.json()
         print(response.url)
         if jsonResponse["response"] == {}:
             return [{}]
         else:
             return jsonResponse["response"]["games"]
-
 
     except HTTPError as http_err:
         if http_err.errno == None:
@@ -156,13 +157,81 @@ def checkCommonGames(friends_games):
 
     pprint(common_owned_games)
 
-
-
     # To get image using image hash
     # http://media.steampowered.com/steamcommunity/public/images/apps/{appid}/{hash}.jpg
     # https://cdn.cloudflare.steamstatic.com/steam/apps/20/header.jpg
 
     return common_owned_games
+
+
+def fromVanityURL(vanityurl):
+    try:
+        response = requests.get(
+            f"https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key={SteamWeb_Api_Key}&vanityurl={vanityurl}")
+        response.raise_for_status()
+        # access JSON content
+        jsonResponse = response.json()
+        print(response.url)
+
+        if jsonResponse["response"]["success"] == 42:  # 42 = invalid vanity url
+            raise InvalidVanityURL("Invalid vanity URL")
+
+        return jsonResponse["response"]["steamid"]
+
+    except HTTPError as http_err:
+        if http_err.errno is None:
+            print(f"Access denied:\nHTTPError:")
+            print(HTTPError)
+            raise
+        else:
+            print(f"HTTPError: {http_err.errno}")
+
+    except Exception as err:
+        print(f'Other error occurred: {err}')
+        raise
+
+
+def fromSteamID(steamid):
+    x_y_z = steamid[6:].split(":")
+
+    x = int(x_y_z[0])
+    y = int(x_y_z[1])
+    z = int(x_y_z[2])
+
+    # W=Z*2+V+Y
+    return 76561197960265728 + (z * 2 + y)
+
+
+def getSteam64ID(steamid):
+    # checks if the ID was given straight away
+    try:
+
+        # Checks for Steam64IDs
+        match = re.findall(r"\b76561198\d{9}\b", steamid)
+        if match:
+            return match[0]
+
+        # Checks for SteamIDs
+        match = re.findall(r"\bSTEAM_\d:[01]:[0-9]{1,17}\b", steamid)
+        if match:
+            return fromSteamID(match[0])
+
+        # Checks for vanity ID in url
+        match = re.findall(r"steamcommunity\.com/id/([\w\d]+)", steamid)
+        if match:
+            return fromVanityURL(match[0])
+
+        match = re.findall(r"([\w\d]+)", steamid)
+        if match:
+            return fromVanityURL(match[0])
+
+    except Exception as err:
+        print("Input could not be used to find a profile.")
+        raise
+
+
+class InvalidVanityURL(Exception):
+    pass
 
 
 if __name__ == '__main__':
@@ -186,5 +255,16 @@ if __name__ == '__main__':
 
     # pprint(getOwnedGames(76561198050567488))
 
-    data = checkCommonGames(getSelectedFriendsGames(["76561198050567488", "76561198084835416", "76561197978271378", "76561198017922807"]))
+    # data = checkCommonGames(getSelectedFriendsGames(["76561198050567488", "76561198084835416", "76561197978271378", "76561198017922807"]))
 
+    # pprint(fromSteamID("STEAM_0:0:45150880"))
+
+    # print("URL with steam64id", getSteam64ID("https://steamcommunity.com/profiles/76561198055291268"))
+    # print()
+    # print("SteamID", getSteam64ID("STEAM_0:0:45150880"))
+    # print()
+    # print("steam64id", getSteam64ID("76561198055291268"))
+    # print()
+    # print("Vanity URL", getSteam64ID("https://steamcommunity.com/id/spikej/"))
+    print()
+    print("Vanity", getSteam64ID("spikej21312312321"))

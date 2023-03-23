@@ -18,19 +18,24 @@ def home():  # home landing page
     return render_template("home.html")
 
 
-@app.route("/steam_intersect/", methods=['POST'])
+@app.route("/steam_intersect/", methods=['GET'])
 def steam_intersect():  # home landing page
+    form = UserFriendsList(request.form)
+    return render_template("steam_intersect.html", form=form)
 
-    # TODO Fix page not loading
-
+@app.route("/steam_intersect/", methods=['POST'])
+def steam_intersect_post():  # home landing page
     form = UserFriendsList(request.form)
     if request.method == 'POST' and form.validate():
-        form_steam64id = form.steam64id.data
         try:
-            return steam_friends_get(form_steam64id)
-        except:
-            return render_template("steam_intersect.html", form=form)
-    return render_template("steam_intersect.html", form=form)
+            sid = queries.getSteam64ID(form.steam64id.data)
+            return steam_friends_get(sid)
+
+        except Exception as err:
+            error = "Unable to get Steam profile."
+            return render_template("steam_intersect.html", form=form, error=f"{error}")
+
+
 
 
 @app.route("/steam_intersect/<steam64id>", methods=['GET'])
@@ -39,10 +44,13 @@ def steam_friends_get(steam64id):
     print("friends list")
     form = UserFriendsList(request.form)
 
+    # Gets the community (steam64id) for API calls
+    sid = queries.getSteam64ID(steam64id)
+
     try:
-        output = queries.getFriendListDataAll(steam64id)
+        output = queries.getFriendListDataAll(sid)
         sortedoutput = sorted(output, key=lambda d: d['personaname'])
-        return render_template("steam_intersect_user_friends.html", form=form, output=sortedoutput, input=steam64id)
+        return render_template("steam_intersect_user_friends.html", form=form, output=sortedoutput, input=sid)
     except TypeError as e:
         output = f"User privacy settings likely blocking view of friends list."
         return render_template("steam_intersect_user_friends.html", form=form, error=output)
@@ -62,8 +70,9 @@ def steam_friends_post(steam64id):
     # TODO Add a "Sort of shared" games section
 
     try:
+        sid = queries.getSteam64ID(steam64id)
         selected_friends = request.form.getlist("ids[]")
-        selected_friends.append(steam64id)
+        selected_friends.append(sid)
 
         shared_games = queries.checkCommonGames(queries.getSelectedFriendsGames(selected_friends))
 
