@@ -18,24 +18,21 @@ def home():  # home landing page
     return render_template("home.html")
 
 
-@app.route("/steam_intersect/", methods=['GET'])
+@app.route("/steam_intersect/", methods=['GET', 'POST'])
 def steam_intersect():  # home landing page
-    form = UserFriendsList(request.form)
-    return render_template("steam_intersect.html", form=form)
+    if request.method == 'GET':
+        return render_template("steam_intersect.html")
 
-@app.route("/steam_intersect/", methods=['POST'])
-def steam_intersect_post():  # home landing page
-    form = UserFriendsList(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         try:
-            sid = queries.getSteam64ID(form.steam64id.data)
-            return steam_friends_get(sid)
+
+            user = request.form["steamid"]
+            steam64id = queries.getSteam64ID(user)
+            return steam_friends_get(steam64id)
 
         except Exception as err:
             error = "Unable to get Steam profile."
-            return render_template("steam_intersect.html", form=form, error=f"{error}")
-
-
+            return render_template("steam_intersect.html", error=f"{error}")
 
 
 @app.route("/steam_intersect/<steam64id>", methods=['GET'])
