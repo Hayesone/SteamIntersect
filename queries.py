@@ -53,7 +53,6 @@ def getFriendListDataAll(steam64id):
     try:
         # TODO: Check if privacy is Friends/Private before calling friends list
         friend_steam64id = getFriendsList(steam64id)
-
         friendID_list = []
         friendsListData_dict = []
 
@@ -71,7 +70,7 @@ def getFriendListDataAll(steam64id):
             # TODO: Fix dictionary merging
             query = ",".join(batch)
             tempDict = checkUserExists(query)["response"]["players"]
-            friendsListData_dict = friendsListData_dict + tempDict
+            friendsListData_dict += tempDict
             print(len(friendsListData_dict))
 
         return friendsListData_dict
@@ -80,7 +79,7 @@ def getFriendListDataAll(steam64id):
         print(http_err.errno)
 
     except Exception as err:
-        print(type(err))
+        print(err.with_traceback())
         print(f'{inspect.stack()[0][3]} - Other error occurred:{err}')
 
 
@@ -266,5 +265,11 @@ if __name__ == '__main__':
     # print("steam64id", getSteam64ID("76561198055291268"))
     # print()
     # print("Vanity URL", getSteam64ID("https://steamcommunity.com/id/spikej/"))
-    print()
-    print("Vanity", getSteam64ID("spikej21312312321"))
+    # print()
+    # print("Vanity", getSteam64ID("spikej21312312321"))
+
+    # pprint(getFriendListDataAll("76561198084835416", True))
+
+    # pprint(checkUserExists("76561198328334201"))
+
+    pprint(getSteam64ID("https://steamcommunity.com/id/spikej/"))

@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 
 import queries, inspect
 from forms import UserFriendsList
@@ -27,49 +27,55 @@ def steam_intersect():  # home landing page
         try:
 
             user = request.form["steamid"]
-            steam64id = queries.getSteam64ID(user)
-            return steam_friends_get(steam64id)
+            queries.getSteam64ID(user)  # checks if the input is valid
+            return redirect(url_for("steam_friends_get", user=user))
 
         except Exception as err:
+            print(err)
             error = "Unable to get Steam profile."
             return render_template("steam_intersect.html", error=f"{error}")
 
 
-@app.route("/steam_intersect/<steam64id>", methods=['GET'])
-def steam_friends_get(steam64id):
+@app.route("/steam_intersect/<user>", methods=['GET'])
+def steam_friends_get(user):
     print(f"Entering: {inspect.stack()[0][3]}")
     print("friends list")
-    form = UserFriendsList(request.form)
-
     # Gets the community (steam64id) for API calls
-    sid = queries.getSteam64ID(steam64id)
+    steam64id = queries.getSteam64ID(user)
 
     try:
-        output = queries.getFriendListDataAll(sid)
-        sortedoutput = sorted(output, key=lambda d: d['personaname'])
-        return render_template("steam_intersect_user_friends.html", form=form, output=sortedoutput, input=sid)
+        friendsListData = queries.getFriendListDataAll(steam64id)
+        user = queries.checkUserExists(steam64id)["response"]["players"][0]
+        sortedFLD = sorted(friendsListData, key=lambda d: d['personaname'])
+        print("SHOULD BE WORKING")
+        return render_template("steam_intersect_user_friends.html", output=sortedFLD, user=user)
     except TypeError as e:
+        print(e, e.with_traceback())
         output = f"User privacy settings likely blocking view of friends list."
-        return render_template("steam_intersect_user_friends.html", form=form, error=output)
+        return render_template("steam_intersect_user_friends.html", error=output)
 
     except Exception as e:
         output = f"{e}"
         print(output)
-        return render_template("steam_intersect_user_friends.html", form=form, exception=e)
+        return render_template("steam_intersect_user_friends.html", exception=e)
 
 
-@app.route("/steam_intersect/<steam64id>", methods=['POST'])
-def steam_friends_post(steam64id):
+@app.route("/steam_intersect/<user>/", methods=['GET'])
+def steam_friends_post(user):
     print(f"Entering: {inspect.stack()[0][3]}")
 
     # TODO Handle profiles with private games
     # TODO Have a placeholder image if game has no header.jpg
     # TODO Add a "Sort of shared" games section
 
+    # Gets the community (steam64id) for API calls
+    steam64id = queries.getSteam64ID(user)
+
     try:
-        sid = queries.getSteam64ID(steam64id)
-        selected_friends = request.form.getlist("ids[]")
-        selected_friends.append(sid)
+        selected_friends = request.args.getlist("ids[]")
+        selected_friends.append(steam64id)
+
+        print(selected_friends)
 
         shared_games = queries.checkCommonGames(queries.getSelectedFriendsGames(selected_friends))
 

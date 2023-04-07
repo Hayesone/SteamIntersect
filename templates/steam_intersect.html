@@ -49,13 +49,11 @@
 
     <div class="container">
 
-        <div>
         {% block intersect_content %}
             <h1>{% block title %} SteamIntersect {% endblock %}</h1>
             <p>Compare your friends steam games to see which games you have in common.</p>
-            {{ macro.search_user_friendlist("POST", error) }}
+            {{ macro.search_user_friendlist("POST", user, error) }}
         {% endblock %}
-        </div>
 
     </div>
 
